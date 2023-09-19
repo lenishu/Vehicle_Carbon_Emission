@@ -1,96 +1,86 @@
 import axios from "axios";
 import React from "react";
 import Header from "./Components/Header";
+import { useForm } from "react-hook-form";
 // import Select from "react-select";
 
-const initialState = {
-  numbers: [
-    { id: 0, value: "" },
-    { id: 1, value: "" },
-    { id: 2, value: "" },
-    { id: 3, value: "" },
-  ],
-  fueltype: ["petrolium"],
-  transmission: ["Manual"],
-};
+const options = ["petrolium", "diesel", "coal", "ethanol"];
+const transmission = ["Manual", "Automatic", "CVT", "a"];
+const Inputs = [
+  {
+    id: 1,
+    name: "number1",
+    placeholder: "number1",
+  },
+  { id: 2, name: "number2", placeholder: "number2" },
+  { id: 3, name: "number3", placeholder: "number3" },
+  { id: 4, name: "number4", placeholder: "number4" },
+];
 
 function App() {
   const [Options, setOptions] = React.useState([]);
   const [transmissionOptions, setTransmissionOptions] = React.useState([]);
-  const options = ["petrolium", "diesel", "coal", "ethanol"];
-  const transmission = ["Manual", "Automatic", "CVT", "a"];
   const [res, setRes] = React.useState();
-  const [data, setData] = React.useState(initialState);
-
-  const ResetInputs = () => {
-    setData(initialState);
-  };
-
-  const handleChange = (e, i) => {
-    const cloned = [...data.numbers];
-    cloned[i].value = e.target.value;
-    const newarr = data.numbers.splice(0, data.numbers.length, ...cloned);
-    setData({
-      ...data,
-      numbers: newarr,
-    });
-  };
+  const [data, setData] = React.useState("");
 
   console.log(data);
 
-  const handleFuelOptionsChange = (e) => {
-    setData({ ...data, fueltype: [e.target.value] });
-  };
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm();
 
   React.useEffect(() => {
-    if (data.fueltype[0] === "petrolium") {
+    if (data.fueltype === "petrolium") {
       setOptions([1, 0, 0, 0]);
     }
 
-    if (data.fueltype[0] === "diesel") {
+    if (data.fueltype === "diesel") {
       setOptions([0, 1, 0, 0]);
     }
 
-    if (data.fueltype[0] === "coal") {
+    if (data.fueltype === "coal") {
       setOptions([0, 0, 1, 0]);
     }
 
-    if (data.fueltype[0] === "coal") {
+    if (data.fueltype === "coal") {
       setOptions([0, 0, 1, 0]);
     }
 
-    if (data.fueltype[0] === "ethanol") {
+    if (data.fueltype === "ethanol") {
       setOptions([0, 0, 0, 1]);
     }
 
-    if (data.transmission[0] === "Manual") {
+    if (data.transmission === "Manual") {
       setTransmissionOptions([1, 0, 0, 0]);
     }
 
-    if (data.transmission[0] === "Automatic") {
+    if (data.transmission === "Automatic") {
       setTransmissionOptions([0, 1, 0, 0]);
     }
 
-    if (data.transmission[0] === "CVT") {
+    if (data.transmission === "CVT") {
       setTransmissionOptions([0, 0, 1, 0]);
     }
 
-    if (data.transmission[0] === "a") {
+    if (data.transmission === "a") {
       setTransmissionOptions([0, 0, 0, 1]);
     }
   }, [data.fueltype, data.transmission]);
 
-  const handleTransmissionOptionsChange = (e) => {
-    setData({
-      ...data,
-      transmission: [e.target.value],
-    });
-  };
+  async function handleClick(data) {
+    setData(data);
+    /*
+     * @dev changing numbers object values to array as backend receives data in the form of array
+     */
+    const numbers = Object.values(data.numbers);
+    const nums = numbers.map(Number);
 
-  async function handleClick() {
-    let nums = data.numbers.map(({ value }) => value);
-    nums = nums.map(Number);
-    console.log(nums);
+    /*
+     * There is issue on first click as data is set on button click but setter function is Asynchronous to get the updated value, it will be resolved soon
+     */
     await axios
       .post("http://127.0.0.1:8000/setData/", {
         Options,
@@ -98,7 +88,10 @@ function App() {
         transmissionOptions,
       })
       .then((res) => {
-        console.log(res), ResetInputs(), setRes(res.data);
+        if (res.status === 200) {
+          setRes(res.data);
+          reset();
+        }
       })
       .catch((e) => console.log(e));
   }
@@ -110,62 +103,67 @@ function App() {
         <div className="flex flex-col gap-2 max-w-5xl w-full m-auto py-3 px-3">
           <div className=" flex flex-col gap-3">
             <h1>Numerical Data</h1>
-            {data?.numbers?.map((num, i) => {
-              console.log(num);
-              return (
-                <input
-                  key={i}
-                  type="number"
-                  name={`number${i + 1}`}
-                  id={`number${i + 1}`}
-                  onChange={(e) => handleChange(e, i)}
-                  placeholder={`number${i + 1}`}
-                  value={num.value}
-                />
-              );
-            })}
-          </div>
-          <select
-            name="fueltype"
-            id="fuel-type"
-            onChange={(e) => {
-              handleFuelOptionsChange(e);
-            }}
-            value={data.fueltype[0]}
-            className=" py-2"
-          >
-            {options.map((option, i) => {
-              return (
-                <option value={option} key={i}>
-                  {option}
-                </option>
-              );
-            })}
-          </select>
-          <select
-            name="transmission"
-            id="transmission-type"
-            onChange={(e) => {
-              handleTransmissionOptionsChange(e);
-            }}
-            value={data.transmission[0]}
-            className=" py-2"
-          >
-            {transmission.map((t, i) => {
-              return (
-                <option value={t} key={i}>
-                  {t}
-                </option>
-              );
-            })}
-          </select>
-          <div className=" py-2">
-            <button
-              onClick={handleClick}
-              className=" border border-[#ccc] px-2 py-2 rounded-sm w-full"
+            <form
+              onSubmit={handleSubmit((data) => {
+                handleClick(data);
+              })}
+              className="flex flex-col gap-3"
             >
-              Predict
-            </button>
+              {Inputs.map((input) => {
+                return (
+                  <div key={input.id} className="flex flex-col">
+                    {errors?.numbers?.[input.name] && (
+                      <span className="">
+                        <em className=" text-red-500">
+                          please enter a number*
+                        </em>{" "}
+                      </span>
+                    )}
+                    <input
+                      type="number"
+                      name={input.name}
+                      placeholder={input.placeholder}
+                      {...register(`numbers[${input.name}]`, {
+                        required: true,
+                      })}
+                    />
+                  </div>
+                );
+              })}
+              <select
+                name="fueltype"
+                id="fuel-type"
+                {...register("fueltype", { required: true })}
+                className=" py-2"
+              >
+                {options.map((option, i) => {
+                  return (
+                    <option value={option} key={i}>
+                      {option}
+                    </option>
+                  );
+                })}
+              </select>
+              <select
+                name="transmission"
+                id="transmission-type"
+                {...register("transmission", { required: true })}
+                className=" py-2"
+              >
+                {transmission.map((t, i) => {
+                  return (
+                    <option value={t} key={i}>
+                      {t}
+                    </option>
+                  );
+                })}
+              </select>
+              <div className=" py-2">
+                <button className=" border border-[#ccc] px-2 py-2 rounded-sm w-full">
+                  Predict
+                </button>
+              </div>
+            </form>
           </div>
           <p>Result: {res && res[0]} </p>
         </div>
