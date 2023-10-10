@@ -4,8 +4,66 @@ import Header from "./Components/Header";
 import { useForm } from "react-hook-form";
 // import Select from "react-select";
 
-const options = ["petrolium", "diesel", "coal", "ethanol"];
-const transmission = ["Manual", "Automatic", "CVT", "a"];
+const options = [
+  "-- select a fuel type --",
+  "petrolium",
+  "diesel",
+  "coal",
+  "ethanol",
+];
+// const options = [
+//   {
+//     value: "-- select a fuel type --",
+//     label: "-- select a fuel type --",
+//     disabled: true,
+//   },
+//   {
+//     value: "petrolium",
+//     label: "petrolium",
+//   },
+//   {
+//     value: "diesel",
+//     label: "diesel",
+//   },
+//   {
+//     value: "coal",
+//     label: "coal",
+//   },
+//   {
+//     value: "ethanol",
+//     label: "ethanol",
+//   },
+// ];
+const transmission = [
+  "-- select a transmission type --",
+  "Manual",
+  "Automatic",
+  "CVT",
+  "a",
+ ];
+// const transmission = [
+//   {
+//     value: "-- select a transmission type --",
+//     label: "-- select a transmission type --",
+//     disabled: true,
+//   },
+//   {
+//     value: "Manual",
+//     label: "Manual",
+//   },
+//   {
+//     value: "Automatic",
+//     label: "Automatic",
+//   },
+//   {
+//     value: "CVT",
+//     label: "CVT",
+//   },
+//   {
+//     value: "a",
+//     label: "a",
+//   },
+// ];
 const Inputs = [
   {
     id: 1,
@@ -22,8 +80,6 @@ function App() {
   const [transmissionOptions, setTransmissionOptions] = React.useState([]);
   const [res, setRes] = React.useState();
   const [data, setData] = React.useState("");
-
-  console.log(data);
 
   const {
     register,
@@ -96,6 +152,8 @@ function App() {
       .catch((e) => console.log(e));
   }
 
+  console.log(data);
+
   return (
     <div>
       <Header />
@@ -138,12 +196,34 @@ function App() {
               >
                 {options.map((option, i) => {
                   return (
-                    <option value={option} key={i}>
+                    <option value={option} key={i} disabled={i === 0}>
                       {option}
                     </option>
                   );
                 })}
               </select>
+              {/* <Controller
+                control={control}
+                name="test"
+                render={({ field: { onChange, value, ref } }) => {
+                  return (
+                    <Select
+                      ref={ref}
+                      defaultInputValue="-- select a fuel type --"
+                      options={options}
+                      value={options.find((c) => c.value === value)}
+                      onChange={onChange}
+                      // onChange={(va) => onChange(va.value)}
+                      {...register("fueltype", { required: true })}
+                      isOptionDisabled={(option) => option.disabled}
+                    />
+                  );
+                }}
+              />
+              <Select
+                options={transmission}
+                isOptionDisabled={(option) => option.disabled}
+              /> */}
               <select
                 name="transmission"
                 id="transmission-type"
@@ -152,7 +232,7 @@ function App() {
               >
                 {transmission.map((t, i) => {
                   return (
-                    <option value={t} key={i}>
+                    <option value={t} key={i} disabled={i === 0 ? true : false}>
                       {t}
                     </option>
                   );
